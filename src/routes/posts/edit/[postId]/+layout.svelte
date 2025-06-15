@@ -1,0 +1,42 @@
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	import type { LayoutData } from './$types';
+	import SidebarNav from '$lib/components/posts/editor/sidebar-nav.svelte';
+	import Separator from '$lib/components/ui/separator/separator.svelte';
+	import { page } from '$app/state';
+
+	let { data, children }: { data: LayoutData; children: Snippet } = $props();
+
+	const sidebarNavItems = [
+		{
+			title: 'Metadaten',
+			href: `/posts/edit/${page.params.postId}/meta`
+		},
+		{
+			title: 'Inhalt',
+			href: `/posts/edit/${page.params.postId}/content`
+		},
+		{
+			title: 'Veröffentlichen',
+			href: `/posts/edit/${page.params.postId}/publish`
+		}
+	];
+</script>
+
+<div class="space-y-6 p-10 pb-16 md:block">
+	<div class="">
+		<h2 class="text-2xl font-bold tracking-tight">Bericht bearbeiten</h2>
+		<!-- <p class="text-muted-foreground">
+			Bearbeite d.
+		</p> -->
+	</div>
+	<Separator class="my-6" />
+	<div class="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+		<aside class="-mx-4 lg:w-1/5">
+			<SidebarNav items={sidebarNavItems} />
+		</aside>
+		<div class="flex-1 lg:max-w-full">
+			{@render children()}
+		</div>
+	</div>
+</div>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cropper Playground</title>
+  <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --border: #e2e8f0;
+      --accent: #4f46e5;
+      --text: #1f2937;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      margin: 2rem;
+      max-width: 900px;
+      margin-inline: auto;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+
+    input[type="file"] {
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .cropper-wrap {
+      max-width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .controls button {
+      padding: 0.5rem 1rem;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .controls button:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .preview {
+      margin-top: 2rem;
+    }
+
+    canvas {
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+      margin-top: 1rem;
+      max-width: 100%;
+    }
+
+    a button {
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cropper Playground</h1>
+
+  <input type="file" id="fileInput" accept="image/*" />
+
+  <div class="cropper-wrap">
+    <img id="image" alt="Bild zum Zuschneiden" />
+  </div>
+
+  <div class="controls">
+    <button onclick="crop()">Crop</button>
+    <button onclick="rotate(-45)">Rotate -45°</button>
+    <button onclick="rotate(45)">Rotate +45°</button>
+    <button onclick="scaleX()">Flip X</button>
+    <button onclick="scaleY()">Flip Y</button>
+    <button onclick="zoom(0.1)">Zoom In</button>
+    <button onclick="zoom(-0.1)">Zoom Out</button>
+    <button onclick="reset()">Reset</button>
+  </div>
+
+  <div class="preview">
+    <h2>Zugeschnittenes Bild</h2>
+    <canvas id="canvas"></canvas>
+    <br />
+    <button onclick="finishUp()"></button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
+  <script>
+    const image = document.getElementById('image');
+    const canvas = document.getElementById('canvas');
+    const downloadLink = document.getElementById('downloadLink');
+    let cropper;
+
+    let croppedImage = null;
+
+    function getURLParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    function initCropper(src) {
+      image.src = src;
+      image.onload = () => {
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(image, {
+          aspectRatio: NaN,
+          viewMode: 1,
+          autoCropArea: 0.8,
+          responsive: true,
+          background: true,
+          guides: true,
+        });
+      };
+    }
+
+    window.addEventListener('load', () => {
+      const urlImage = getURLParam('img');
+      if (urlImage) {
+        initCropper(urlImage);
+      } else {
+        // Default fallback image
+        initCropper('https://via.placeholder.com/800x500.png');
+      }
+    });
+
+    document.getElementById('fileInput').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file && /^image\//.test(file.type)) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          initCropper(reader.result);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function crop() {
+      const croppedCanvas = cropper.getCroppedCanvas();
+      canvas.width = croppedCanvas.width;
+      canvas.height = croppedCanvas.height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(croppedCanvas, 0, 0);
+      downloadLink.href = canvas.toDataURL('image/png');
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+            console.error("Cannot create file from canvas");
+
+            return alert("Fehler beim Erstellen des Bildes.");
+        }
+
+        croppedImage = new File([blob], "cropped_image.png", { type: "image/png" });
+      })
+    }
+
+    function rotate(deg) {
+      cropper.rotate(deg);
+    }
+
+    function scaleX() {
+      const scale = cropper.getData().scaleX || 1;
+      cropper.scaleX(scale * -1);
+    }
+
+    function scaleY() {
+      const scale = cropper.getData().scaleY || 1;
+      cropper.scaleY(scale * -1);
+    }
+
+    function zoom(ratio) {
+      cropper.zoom(ratio);
+    }
+
+    function reset() {
+      cropper.reset();
+    }
+
+    function finishUp() {
+        
+    }
+  </script>
+</body>
+</html>

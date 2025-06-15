@@ -5,8 +5,14 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
+	
+	build: {
+		commonjsOptions: {
+			include: [/node_modules/],
+		},
+	},
 	test: {
-		projects: [
+		workspace: [
 			{
 				extends: './vite.config.ts',
 				plugins: [svelteTesting()],
