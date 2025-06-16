@@ -29,7 +29,7 @@
 
 	let userPermissions;
 
-	let isAdmin = data.user.role == "ADMIN";
+	let isAdmin = data.user?.role == "ADMIN";
 
 	let accessibleTeams = $state([]);
 	let accessibleDepartments = $state([]);
