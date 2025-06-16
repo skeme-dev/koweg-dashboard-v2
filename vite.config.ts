@@ -5,7 +5,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
-	
+	server: {
+			allowedHosts: ["dashboard-v2.koweg.skeme.dev"]
+	},
 	build: {
 		commonjsOptions: {
 			include: [/node_modules/],
