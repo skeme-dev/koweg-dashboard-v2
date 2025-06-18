@@ -14,7 +14,7 @@
 	let currentName = $state.raw('');
 	let currentEmail = $state.raw('');
 	let currentPhoneNumber = $state.raw('');
-	let currentRole = $state.raw('');
+	let currentRole = $state('');
 
 	const roles = [
 		{
@@ -31,7 +31,9 @@
 		}
 	];
 
-    const triggerContent = $derived(roles.find(role => role.value === currentRole)?.label ?? "Wähle eine Rolle aus")
+	const triggerContent = $derived(
+		roles.find((role) => role.value === currentRole)?.label ?? 'Wähle eine Rolle aus'
+	);
 </script>
 
 <Sheet.Root bind:open>
@@ -57,25 +59,18 @@
 			</div>
 			<div class="grid items-center gap-4">
 				<Label for="role" class="text-left">Rolle</Label>
-				<Select.Root
-					onSelectedChange={(item) => {
-						console.log(item.value);
-						currentRole = item.value;
-					}}
-					portal={null}
-				>
+				<Select.Root type="single" bind:value={currentRole} portal={null}>
 					<Select.Trigger class="">
 						{triggerContent}
 					</Select.Trigger>
 					<Select.Content>
 						<Select.Group>
 							<Select.Label>Rolle</Select.Label>
-							{#each roles as role}
+							{#each roles as role (role.value)}
 								<Select.Item value={role.value} label={role.label}>{role.label}</Select.Item>
 							{/each}
 						</Select.Group>
 					</Select.Content>
-					<Select.Input name="role" />
 				</Select.Root>
 			</div>
 		</div>
@@ -106,7 +101,6 @@
 						);
 					}}
 					class="mt-4 w-full"
-					
 					type="submit">Erstellen</Button
 				>
 			</Sheet.Close>
