@@ -57,7 +57,7 @@
 
 {#if page.url.pathname.startsWith('/login')}
 	{@render children()}
-{:else}
+{:else if data.user}
 	<FileUploadDialog />
 	<UserPickerDialog users={page.data.users} />
 	<DeleteDialog />
@@ -356,4 +356,6 @@
 			{@render children()}
 		</div>
 	</div>
+{:else}
+<p>Lade Benutzer...</p>
 {/if}
