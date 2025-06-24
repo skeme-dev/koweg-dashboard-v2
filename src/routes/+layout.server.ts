@@ -13,7 +13,6 @@ export const load: LayoutLoad = (async ({ url, locals }) => {
 	const permissions = await locals.pb.collection("permissions").getFullList();
 	const user = locals.pb.authStore.record;
 
-
 	if (permissions.length === 0) {
 		return error(500, {
 			message: "No permissions found. Please contact support.",

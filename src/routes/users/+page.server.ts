@@ -1,6 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { PUBLIC_POCKETBASE_URL } from '$env/static/public';
+import { success } from 'zod/v4';
 
 export const load = (async ({ locals }) => {
 	const users = await locals.pb.collection('users').getFullList();
@@ -59,6 +60,47 @@ export const actions = {
 		} catch (error) {
 			console.error(error);
 			return fail(500, { message: 'Failed to send invitation to server' });
+		}
+	},
+	createPermission: async ({ locals, request }) => {
+		const keys = ["deps", "teams", "users"];
+		const form = await request.formData();
+
+		let data = {};
+
+		for (const key of keys) {
+			if (form.has(key)) {
+				data[key] = form.getAll(key).length == 1 ? form.get(key) : form.getAll(key);  
+			}
+		}
+
+		console.log(data);
+
+		try {
+			await locals.pb.collection("permissions").create(data);
+			return { success: true };
+		} catch (error) {
+			console.error(error);
+			return { error: true };
+		}
+
+	},
+	updatePermission: async ({ locals, request }) => {
+		const data = await request.formData();
+
+		const permissionId = data.get("permissionId") as string;
+		const permittedUsers = data.getAll("users") as string[];
+		
+		try {
+			await locals.pb.collection("permissions").update(permissionId, {
+				users: permittedUsers
+			});
+
+			return { success: true };
+		} catch (error) {
+			console.error(error);
+			
+			return { error: true }
 		}
 	}
 };

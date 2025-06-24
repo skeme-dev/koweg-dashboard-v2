@@ -25,8 +25,6 @@
 
 	const permissions = data.permissions;
 
-	console.log(data.user);
-
 	let userPermissions;
 
 	let isAdmin = data.user?.role == "ADMIN";
@@ -34,6 +32,7 @@
 	let accessibleTeams = $state([]);
 	let accessibleDepartments = $state([]);
 
+	console.log("User permissions:")
 	
 	onMount(() => {
 		
@@ -57,7 +56,7 @@
 
 {#if page.url.pathname.startsWith('/login')}
 	{@render children()}
-{:else if data.user}
+{:else if data.user }
 	<FileUploadDialog />
 	<UserPickerDialog users={page.data.users} />
 	<DeleteDialog />
@@ -125,7 +124,7 @@
 					</Tooltip.Trigger>
 					<Tooltip.Content side="right">Anfragen</Tooltip.Content>
 				</Tooltip.Root>
-				{#if isAdmin || (accessibleDepartments.length > 0 && accessibleDepartments.length !== 1)}
+				{#if data.user?.role == "ADMIN" || (accessibleDepartments.length > 0 && accessibleDepartments.length !== 1)}
 					<Tooltip.Root>
 					<Tooltip.Trigger >
 						<a

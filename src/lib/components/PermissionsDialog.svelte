@@ -11,10 +11,11 @@
     // let unsubscribe: Unsubscriber;
 
     let { users, permissions, open = $bindable() } = $props();
-
-    let currentPermission;
-
+    
+    let currentPermission: { users: any; id: string; };
     let permittedUsers = getPermittedUsers(permissions, 'deps', page.params.departmentId);
+    
+     console.log(permittedUsers);
     let selectedUsers = $state.raw(
          users.filter((user) => {
               return permittedUsers.find((pUserId: string) => {
@@ -46,36 +47,70 @@
     }
 
     function getPermittedUsers(permissions: any[], param: 'deps' | 'teams', recordId: string) {
-        console.log(permissions) 
         
         if (permissions.length === 0) {
-              return new Error('No permissions found');
-         }
+              const e = new Error('No permissions found');
+               console.error(e);
+
+               return [];
+          }
 
          currentPermission = permissions.find((permission) => {
               return permission[param] == recordId;
          });
 
          if (!currentPermission) {
-              return new Error('No permission with this id found');
-         }
+              const e = new Error('No permission with this id found');
+               console.error(e);
+
+               return [];
+          }
 
          return currentPermission.users;
     }
 
-    function updatePermission(permissionId: string, users: string[]) {
-         const data = {
-              permissionId,
-              permittedUsers: users
-         };
+    function createPermission(permUsers: any[], id: string) {
+          const data = new FormData();
+
+          data.append("deps", isTeamOrDepartment(page.params) === 'department' ? id : "");
+          
+          data.append("teams", isTeamOrDepartment(page.params) === 'team' ? id : "");
+
+          for (const userId of permUsers) {
+               data.append('users', userId);
+          }
+
+          sendFormData('/users?/createPermission', data)
+              .then((resp) => {
+                   console.log(resp);
+          }).catch((err) => {
+                   console.error(err);
+          });
+    }
+
+    function updatePermission(permissionId: string, permUsers: string[]) {
+         if (!currentPermission) {
+          console.log("No users found, creating new permission");
+            createPermission(permUsers, page.params.departmentId || page.params.teamId);
+            return;
+         }
+
+         const data = new FormData();
+
+         data.append("permissionId", permissionId);
+
+          console.log("Updating permission", permissionId);
+         for (const userId of permUsers) {
+              data.append('users', userId);
+         }
+
 
          sendFormData('/users?/updatePermission', data)
               .then((resp) => {
                    console.log(resp);
-              })
-              .catch((err) => {
+          }).catch((err) => {
                    console.error(err);
-              });
+          });
     }
 
 </script>
