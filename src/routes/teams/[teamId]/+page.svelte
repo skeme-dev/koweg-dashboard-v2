@@ -63,28 +63,32 @@
 	let formElement;
 	let addPOI = $state(false);
 
-	let currentPOIFunction = $state("");
-	let currentPOIName = $state("");
-	let currentPOIEmail = $state("");
+	let currentPOIFunction = $state('');
+	let currentPOIName = $state('');
+	let currentPOIEmail = $state('');
 
 	async function createPOI() {
 		const d = { function: currentPOIFunction, name: currentPOIName, email: currentPOIEmail };
 
+		sendFormData('?/addPOI', {
+			...(data.team.poi ? { currPOI: JSON.stringify(data.team.poi) } : {}),
+			...d
+		})
+			.then((v) => {
+				addPOI = false;
 
-		sendFormData('?/addPOI', {...(data.team.poi? {currPOI: JSON.stringify(data.team.poi)} : {}), ...d}).then((v) => {
-			addPOI = false;
+				toast.success('Wichtige Person erfolgreich hinzugefügt');
 
-			toast.success("Wichtige Person erfolgreich hinzugefügt");
+				currentPOIFunction = currentPOIName = currentPOIEmail = '';
+			})
+			.catch((err) => {
+				console.error(err);
 
-			currentPOIFunction = currentPOIName = currentPOIEmail = "";
-		}).catch((err) => {
-			console.error(err);
-
-			toast.error("Fehler beim Hinzufügen");
-		});
+				toast.error('Fehler beim Hinzufügen');
+			});
 	}
 
-	console.log(data.team.expand.relatedPOI);
+	console.log(data.team.poi.length);
 
 	// console.log(JSON.parse(JSON.stringify(data.team.poi)))
 </script>
@@ -319,8 +323,8 @@
 					<Card.Content>
 						<div class="grid gap-6">
 							<div class="grid gap-3">
-								{#if data.team.relatedPOI.length > 0}
-									{#each data.team.expand.relatedPOI as trainer}
+								{#if data.team.poi.length > 0}
+									{#each data.team.expand.poi as trainer}
 										<div class="flex items-center justify-between">
 											<span class="text-sm">{trainer.name}</span>
 											<span class="text-sm">{trainer.function}</span>
@@ -350,11 +354,16 @@
 											<Input bind:value={currentPOIEmail} required id="email" type="email" />
 										</div>
 										<div class="col-span-2">
-												<Button onclick={() => {
+											<Button
+												onclick={() => {
 													createPOI();
-												}} size="sm" variant="ghost" class="w-full">
-													Speichern
-												</Button>
+												}}
+												size="sm"
+												variant="ghost"
+												class="w-full"
+											>
+												Speichern
+											</Button>
 										</div>
 									</div>
 								{/if}
@@ -383,14 +392,16 @@
 						<div class="grid gap-2">
 							{#if data.team.team_image}
 								<img
-								alt={`Teambild von ${data.team.name}`}
-								class="aspect-square w-full rounded-md object-cover"
-								height="300"
-								src={data.team.team_image}
-								width="300"
-							/>
+									alt={`Teambild von ${data.team.name}`}
+									class="aspect-square w-full rounded-md object-cover"
+									height="300"
+									src={data.team.team_image}
+									width="300"
+								/>
 							{:else}
-							<p class="text-muted-foreground py-3 text-center font-medium text-xs">Kein Teambild gefunden</p>
+								<p class="text-muted-foreground py-3 text-center text-xs font-medium">
+									Kein Teambild gefunden
+								</p>
 							{/if}
 							{#if changedImage}
 								<div class="bg-accent flex justify-between rounded-lg p-2">
@@ -402,34 +413,34 @@
 										/>
 									</div>
 									<Tooltip.Provider>
-									<Tooltip.Root>
-										<Tooltip.Trigger>
-											<Button
-												onclick={() =>
-													changeTeamImage(
-														data.team.id,
-														changedImage,
-														async () => {
-															toast.success('Bild wurde erfolgreich geändert.');
-															await invalidateAll();
-															changedImage = null;
-														},
-														(error) => {
-															console.log(error);
-															toast.error('Fehler beim Ändern des Bildes.');
-														}
-													)}
-												class="ml-auto"
-												size="icon"
-												variant="outline"
-											>
-												<Save class="h-4 w-4" />
-											</Button>
-										</Tooltip.Trigger>
-										<Tooltip.Content>
-											<p>Bild speichern</p>
-										</Tooltip.Content>
-									</Tooltip.Root>
+										<Tooltip.Root>
+											<Tooltip.Trigger>
+												<Button
+													onclick={() =>
+														changeTeamImage(
+															data.team.id,
+															changedImage,
+															async () => {
+																toast.success('Bild wurde erfolgreich geändert.');
+																await invalidateAll();
+																changedImage = null;
+															},
+															(error) => {
+																console.log(error);
+																toast.error('Fehler beim Ändern des Bildes.');
+															}
+														)}
+													class="ml-auto"
+													size="icon"
+													variant="outline"
+												>
+													<Save class="h-4 w-4" />
+												</Button>
+											</Tooltip.Trigger>
+											<Tooltip.Content>
+												<p>Bild speichern</p>
+											</Tooltip.Content>
+										</Tooltip.Root>
 									</Tooltip.Provider>
 								</div>
 							{/if}

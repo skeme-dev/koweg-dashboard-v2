@@ -7,7 +7,7 @@ import { teamSchema } from '$lib/api/teams';
 export const load = (async ({ params, locals }) => {
 	const users = await locals.pb.collection('users').getFullList({ sort: '-created' });
 	const team = await locals.pb.collection('teams').getOne(params.teamId, {
-		expand: 'trainers,events,trainings_schedule,relatedPOI'
+		expand: 'trainers,events,trainings_schedule,poi'
 	});
 
 	const events = await locals.pb.collection('events').getList(1, 10, {
@@ -140,31 +140,30 @@ export const actions: Actions = {
 			return { error: true, msg: error };
 		}
 	},
-	addPOI: async ({ request, locals, params  }) => {
+	addPOI: async ({ request, locals, params }) => {
 		const form = await request.formData();
 		const teamId = params.teamId as string;
 
 		const data = {
-			name: form.get("name"),
-			function: form.get("function"),
-			email: form.get("email"),
-		}
+			name: form.get('name'),
+			function: form.get('function'),
+			email: form.get('email')
+		};
 
 		let created;
 
 		try {
-			created = await locals.pb.collection("poi").create(data);
+			created = await locals.pb.collection('poi').create(data);
 
 			console.log(created.id);
 
-			await locals.pb.collection("teams").update(teamId, { "relatedPOI+": [created.id] });
+			await locals.pb.collection('teams').update(teamId, { 'relatedPOI+': [created.id] });
 		} catch (error) {
 			console.error(error);
 
-			return fail(400, { message: "Unable to create poi or update team" });
+			return fail(400, { message: 'Unable to create poi or update team' });
 		}
 
-		return { success: true }
-
+		return { success: true };
 	}
 };
